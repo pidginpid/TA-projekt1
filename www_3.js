@@ -9,6 +9,7 @@ const fs = require('fs').promises;
 const pageHead = '<!DOCTYPE html>\n<html lang="et">\n<head>\n\t<meta charset="utf-8">\n\t<title>Karl Jakob Proso, veebiprogrammeerimine</title>\n</head>\n<body>\n';
 const pageBody = '\t<h1>Karl Jakob Proso, veebiprogrammeerimine</h1>\n\t <p>See leht on loodud veebiprogrammeerimise kursusel <a href="https://www.tlu.ee">Tallinna Ülikoolis</a> ning ei sislda tõsiseltvõetavat sisu!</p>\n\t<p>Esialgu tutvusime lihtsalt HTML keelega, peatselt programmeerime.</p>\n\t<hr>';
 const pageBanner = '<img src="veebiprogrammeerimine_2026_TA.png" alt ="banner">';
+const jobApplication = '<img src="jobApplication.jpg" alt="CV pilt">'
 const pageFoot = '\n</body>\n</html>';
 const dateET = require('./src/dateFindET');
 
@@ -29,6 +30,7 @@ http.createServer(async function(req, res) {
 		res.write('\n\t<ul>')
 		res.write('\n\t\t<li><a href="/vanasona">Tänane vanasõna</a></li>');
 		res.write('\n\t\t<li><a href="/kass">Kassi skript</a></li>');
+		res.write('\n\n<hr>' + jobApplication)
 		res.write('\n\t</ul>')
 		res.write(pageFoot);
 		//res.write('Veeb läkski käima!');
@@ -62,13 +64,14 @@ http.createServer(async function(req, res) {
 		res.write(pageHead);
 		res.write(pageBanner);
 		res.write('\n\t<script src="/oneko.js" data-cat="/oneko.gif"></script>');
+		res.write('\n\n<hr>' + jobApplication)
 		res.write('\n\t<p><a href="/">Avaleht</a></p>')
 		res.write(pageFoot);
 		return res.end();
 	}
 
 	else if (currentURL.pathname === '/oneko.js') {
-		// teeme oneko.js faili brauserile kättesaadavaks (samas kaustas, mis www_3.js)
+		// teeme oneko.js faili brauserile kättesaadavaks (samas kaustas)
 		let onekoScriptPath = path.join(__dirname, 'oneko.js');
 		try {
 			const data = await fs.readFile(onekoScriptPath);
@@ -105,6 +108,19 @@ http.createServer(async function(req, res) {
 			return res.end('Pilti ei leitud!');
 		}
 	}
+
+	else if (currentURL.pathname.endsWith('.jpg')) {
+    // universaalne marsruut kõigi .jpg failide jaoks
+    let picPath = path.join(__dirname, 'pic', currentURL.pathname);
+    try {
+        const data = await fs.readFile(picPath);
+        	res.writeHead(200, {"Content-type": "image/jpeg"});
+        	res.end(data);
+    } catch(err) {
+        res.writeHead(404, {"Content-type": "text/plain; charset=utf8"});
+        return res.end('Pilti ei leitud!');
+    }
+}
 
 	else {
 		res.end('Viga 404, ei leia sellist lehte!');
